@@ -1,12 +1,12 @@
 #Requires -Version 5.1
 <#
 .SYNOPSIS
-    Republishes artifacts\MindAttic.Terminal.exe when the exe is missing or any
+    Republishes artifacts\MindAttic.Console.exe when the exe is missing or any
     project source file (*.cs, *.csproj, Directory.Build.props) is newer than
     the exe. Otherwise it's a fast no-op.
 
 .DESCRIPTION
-    Called by MindAttic.Terminal.bat on every launch, and by the in-app
+    Called by MindAttic.Console.bat on every launch, and by the in-app
     "Restart" command before it respawns the Release exe in a new wt tab.
 #>
 
@@ -15,8 +15,8 @@ $ErrorActionPreference = 'Stop'
 
 $here  = Split-Path -Parent $MyInvocation.MyCommand.Path
 $repo  = (Resolve-Path (Join-Path $here '..')).Path
-$exe   = Join-Path $repo 'artifacts\MindAttic.Terminal.exe'
-$src   = Join-Path $repo 'MindAttic.Terminal'
+$exe   = Join-Path $repo 'artifacts\MindAttic.Console.exe'
+$src   = Join-Path $repo 'MindAttic.Console'
 $props = Join-Path $repo 'Directory.Build.props'
 
 function Test-NeedsPublish {

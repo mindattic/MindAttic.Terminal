@@ -15,9 +15,9 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 $repo     = Resolve-Path (Join-Path $PSScriptRoot '..')
-$proj     = Join-Path $repo 'MindAttic.Terminal\MindAttic.Terminal.csproj'
+$proj     = Join-Path $repo 'MindAttic.Console\MindAttic.Console.csproj'
 $outDir   = Join-Path $repo 'artifacts'
-$exeName  = 'MindAttic.Terminal.exe'
+$exeName  = 'MindAttic.Console.exe'
 
 Write-Host "Publishing $proj"
 Write-Host "  → $outDir\$exeName"
