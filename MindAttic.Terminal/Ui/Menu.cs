@@ -87,6 +87,7 @@ public static class Menu
                         return new MenuResult { Selected = chosen };
                     }
                     case ConsoleKey.Escape:
+                        if (!allowBack) break;
                         return new MenuResult { Back = true };
                     default:
                         if (customKeys is not null && customKeys.Contains(keyInfo.Key))
