@@ -12,7 +12,6 @@ public sealed class Project
     public string? TabColor { get; set; }
     public string? ColorScheme { get; set; }
     public string? Provider { get; set; }
-    public bool? MobileEnabled { get; set; }
 
     public string TabTitle => string.IsNullOrWhiteSpace(TabAlias) ? Name : TabAlias!;
 }

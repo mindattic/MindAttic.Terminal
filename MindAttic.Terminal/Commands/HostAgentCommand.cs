@@ -40,9 +40,7 @@ public sealed class HostAgentCommand : Command<HostAgentCommand.Settings>
 
         var store = new SettingsStore();
         var registry = new AgentProviderRegistry(store);
-        var appSettings = store.Load();
-
-        var project = ProjectRoster.FindByName(appSettings, settings.Name);
+        var project = ProjectRoster.FindByName(store.Load(), settings.Name);
         if (project is null)
         {
             Console.Error.WriteLine($"Unknown project: {settings.Name}");
@@ -60,25 +58,6 @@ public sealed class HostAgentCommand : Command<HostAgentCommand.Settings>
         {
             Console.Error.WriteLine($"Provider {provider.Key} has an empty RunCommand.");
             return 2;
-        }
-
-        // Mobile bridge is gated by MobileBridge.FeatureEnabled (currently false
-        // until MindAttic.Mobile ships). When it flips, the existing settings
-        // gates (Mobile.Enabled + AllProjects + project MobileEnabled) take
-        // over without further code changes here.
-        //
-        // The bridge runs the agent inside a separate process whose stdio we
-        // can't see, so the TitlePinner (which polls *this* console's buffer)
-        // would permanently report "Paused" while the bridge is alive. Defer
-        // pinner construction until after the bridge branch is ruled out.
-        var bridge = new MobileBridge();
-        if (bridge.ShouldUse(appSettings, project, store, out var bridgeContext) && bridgeContext is not null)
-        {
-            try { return bridge.Route(bridgeContext, store, provider, project.Name, title); }
-            catch (Exception ex)
-            {
-                Console.Error.WriteLine($"Mobile bridge failed ({ex.Message}); falling back to direct agent.");
-            }
         }
 
         using var pinner = new TitlePinner(title);

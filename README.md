@@ -35,31 +35,16 @@ Persisted via [MindAttic.Vault](https://github.com/mindattic/MindAttic.Vault) at
 %APPDATA%\MindAttic\MindAttic.Terminal\settings.json
 ```
 
-`Mobile.Token` is held in a separate Vault bucket and never written to
-`settings.json`:
-
-```
-%APPDATA%\MindAttic\MindAttic.Mobile\tokens.json
-```
-
 On first run, if the Vault settings file is missing AND
 `D:\Projects\MindAttic\settings.json` exists, the legacy file is read once to
-seed Vault — including moving any plaintext `Mobile.Token` into the token
-bucket.
+seed Vault.
 
-## Mobile bridge
+## Remote control
 
-The handoff to `MindAttic.Mobile.AgentHost.exe` (SignalR proxy that lets a
-phone/iPad drive a tab) is fully implemented in `Services/MobileBridge.cs`
-but **gated behind a kill switch** while `MindAttic.Mobile` is still pre-ship:
-
-```csharp
-public static readonly bool FeatureEnabled = false;
-```
-
-Flip to `true` once Mobile is ready. The paired test
-`MobileBridgeTests.FeatureEnabled_is_currently_off` will start failing —
-update it together with the flip.
+Driving an agent tab from a phone or iPad is now handled by Claude Code's
+built-in `/remote-control`. The previous MindAttic.Mobile SignalR bridge
+(`Services/MobileBridge.cs` and friends) has been removed; nothing in this
+launcher needs to know about it.
 
 ## Tests
 
@@ -72,9 +57,8 @@ dotnet test
 Coverage spans settings/vault round-trips, the legacy-seed migration,
 `CommandLineToArgvW` quoting edge cases, agent-provider resolution + cycling,
 git `--porcelain` parsing (incl. renames, MM both-modified, untracked, quoted
-paths), the auto commit-message + 200-char summary fallback, the backup
-dated-folder allocator, and the Mobile bridge gate logic (currently dormant
-behind the kill switch).
+paths), the auto commit-message + 200-char summary fallback, and the backup
+dated-folder allocator.
 
 ## Retiring the PowerShell launcher
 

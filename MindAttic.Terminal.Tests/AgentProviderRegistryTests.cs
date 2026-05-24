@@ -1,6 +1,5 @@
 using MindAttic.Terminal.Models;
 using MindAttic.Terminal.Services;
-using MindAttic.Vault.Credentials;
 using MindAttic.Vault.Settings;
 using NUnit.Framework;
 
@@ -19,8 +18,7 @@ public sealed class AgentProviderRegistryTests
         tempRoot = Path.Combine(Path.GetTempPath(), "MindAttic.Terminal.Tests", Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(tempRoot);
         var json = new JsonSettingsStore<AppSettings>(Path.Combine(tempRoot, "settings"));
-        var tokens = new TokenStore(Path.Combine(tempRoot, "tokens"));
-        store = new SettingsStore(json, tokens);
+        store = new SettingsStore(json);
         registry = new AgentProviderRegistry(store);
 
         store.Save(new AppSettings
