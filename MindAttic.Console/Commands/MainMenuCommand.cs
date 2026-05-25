@@ -39,6 +39,7 @@ public sealed class MainMenuCommand : AsyncCommand<MainMenuCommand.Settings>
                 new() { Name = "Open Project Tab",    Description = "select a project to open with its configured coding agent", Tag = "open" },
                 new() { Name = "Run Project",         Description = "run a project in a new terminal tab", Tag = "run" },
                 new() { Name = "Backup",              Description = "back up MindAttic to R:\\Backup\\MindAttic", Tag = "backup" },
+                new() { Name = "Deploy All",          Description = "push every catalog page, root site, and app via MindAttic.Deploy", Tag = "deploy" },
                 new() { Name = "Provider",            Description = "set default coding agent or per-project override", Tag = "provider" },
                 new() { Name = "Remote Control",      Description = "run /remote-control in every open Claude tab", Tag = "remote" },
                 new() { Name = "Open Command Prompt", Description = "open cmd at the root directory", Tag = "cmd" },
@@ -56,6 +57,7 @@ public sealed class MainMenuCommand : AsyncCommand<MainMenuCommand.Settings>
                 case "open":     open.Run(); break;
                 case "run":      run.Run(); break;
                 case "backup":   backup.Run(); break;
+                case "deploy":   RunDeployAll(wt); break;
                 case "provider": provider.Run(); break;
                 case "remote":   await RunRemoteControl(); break;
                 case "cmd":
@@ -87,6 +89,30 @@ public sealed class MainMenuCommand : AsyncCommand<MainMenuCommand.Settings>
                 AnsiConsole.MarkupLine($"[red]{result.Failed.Count} tab(s) didn't respond.[/]");
         }
         Thread.Sleep(1200);
+    }
+
+    private static void RunDeployAll(WindowsTerminalLauncher wt)
+    {
+        var root = MindAtticRoot();
+        var deploy = new DeployService();
+        var exe = deploy.ResolveExe(root);
+        if (exe is null)
+        {
+            AnsiConsole.MarkupLine(
+                $"[red]MindAttic.Deploy artifact not found.[/] Expected sibling repo at " +
+                $"[grey]{Markup.Escape(Path.Combine(Path.GetDirectoryName(root) ?? root, DeployService.SiblingRepoName, "artifacts", DeployService.ArtifactExeName))}[/]");
+            AnsiConsole.MarkupLine("[grey]Publish MindAttic.Deploy first (run its scripts/publish.ps1).[/]");
+            Thread.Sleep(2000);
+            return;
+        }
+
+        var cmd = DeployService.BuildDeployAllCommandLine(exe);
+        // Tab wd is the Deploy repo root (grandparent of artifacts\…\exe) so
+        // follow-up commands in that pane resolve against the right tree.
+        var deployRepo = Path.GetDirectoryName(Path.GetDirectoryName(exe)) ?? root;
+        wt.Open(wt.BuildDeployAllTab(deployRepo, cmd));
+        AnsiConsole.MarkupLine("[green]Deploy All tab opened.[/] [grey](catalog → site --all → app --all --include-disabled)[/]");
+        Thread.Sleep(900);
     }
 
     private static string MindAtticRoot()
